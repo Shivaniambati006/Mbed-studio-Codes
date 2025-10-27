@@ -1,0 +1,25 @@
+#include "mbed.h"
+#include "TextLCD.h"
+
+// LCD pin connections: RS, E, D4, D5, D6, D7
+TextLCD lcd(PTA2, PTA4, PTA5, PTA12, PTA13, PTA16);
+
+int main() {
+    while (true) {
+        // First message
+        lcd.cls();
+        lcd.locate(0,0);
+        lcd.printf("WELCOME TO");
+        lcd.locate(0,1);
+        lcd.printf("KL25Z PROJECT");
+        thread_sleep_for(2000);
+
+        // Second message
+        lcd.cls();
+        lcd.locate(0,0);
+        lcd.printf("SYSTEM READY");
+        lcd.locate(0,1);
+        lcd.printf("RUNNING OK!");
+        thread_sleep_for(2000);
+    }
+}
