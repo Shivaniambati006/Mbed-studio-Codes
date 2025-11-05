@@ -1,0 +1,55 @@
+#include "mbed.h"
+
+// Motor A connections
+PwmOut ENA(PTA1);
+DigitalOut IN1(PTA2);
+DigitalOut IN2(PTA4);
+
+// Motor B connections
+PwmOut ENB(PTD1);
+DigitalOut IN3(PTD2);
+DigitalOut IN4(PTD3);
+
+int main() {
+    // Set PWM frequency
+    ENA.period(0.001f); // 1kHz
+    ENB.period(0.001f); // 1kHz
+
+    while (true) {
+        // Move both motors forward
+        IN1 = 1; IN2 = 0;
+        IN3 = 1; IN4 = 0;
+        ENA = 0.8f;  // 80% speed
+        ENB = 0.8f;
+        ThisThread::sleep_for(3s);
+
+        // Stop motors
+        ENA = 0.0f;
+        ENB = 0.0f;
+        ThisThread::sleep_for(1s);
+
+        // Move both motors backward
+        IN1 = 0; IN2 = 1;
+        IN3 = 0; IN4 = 1;
+        ENA = 0.8f;
+        ENB = 0.8f;
+        ThisThread::sleep_for(3s);
+
+        // Stop
+        ENA = 0.0f;
+        ENB = 0.0f;
+        ThisThread::sleep_for(1s);
+
+        // Rotate (turn right)
+        IN1 = 1; IN2 = 0;  // Motor A forward
+        IN3 = 0; IN4 = 1;  // Motor B reverse
+        ENA = 0.7f;
+        ENB = 0.7f;
+        ThisThread::sleep_for(2s);
+
+        // Stop again
+        ENA = 0.0f;
+        ENB = 0.0f;
+        ThisThread::sleep_for(1s);
+    }
+}

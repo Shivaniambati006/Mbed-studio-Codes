@@ -1,0 +1,33 @@
+#include "mbed.h"
+
+// Define pins
+PwmOut ENA(PTA1);     // PWM pin to control speed
+DigitalOut IN1(PTA2); // Direction control
+DigitalOut IN2(PTA4); // Direction control
+
+int main() {
+    // Initial setup
+    ENA.period(0.001f); // 1 kHz PWM frequency
+    
+    while (true) {
+        // Rotate motor forward
+        IN1 = 1;
+        IN2 = 0;
+        ENA = 0.8f; // 80% speed
+        ThisThread::sleep_for(3s);
+        
+        // Stop motor
+        ENA = 0.0f;
+        ThisThread::sleep_for(1s);
+        
+        // Rotate motor in reverse
+        IN1 = 0;
+        IN2 = 1;
+        ENA = 0.8f;
+        ThisThread::sleep_for(3s);
+        
+        // Stop again
+        ENA = 0.0f;
+        ThisThread::sleep_for(1s);
+    }
+}
