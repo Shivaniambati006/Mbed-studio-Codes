@@ -1,0 +1,64 @@
+#include "mbed.h"
+
+// Motor A connections
+PwmOut ENA(PTA1);
+DigitalOut IN1(PTA2);
+DigitalOut IN2(PTA4);
+
+// Motor B connections
+PwmOut ENB(PTD1);
+DigitalOut IN3(PTD2);
+DigitalOut IN4(PTD3);
+
+DigitalOut ledR(PTB18);
+DigitalOut ledG(PTB19);
+DigitalOut ledB(PTD1);
+
+// Function to set LED color
+void setLED(bool R, bool G, bool B) {
+    ledR = !R;  // invert because LED is active-low
+    ledG = !G;
+    ledB = !B;
+}
+
+int main() {
+    // Set PWM frequency
+    ENA.period(0.001f); // 1kHz
+    ENB.period(0.001f); // 1kHz
+
+    while (true) {
+        // Move both motors forward
+        IN1 = 1; IN2 = 0;
+        IN3 = 1; IN4 = 0;
+        ENA = 0.8f;  // 80% speed
+        ENB = 0.8f;
+        setLED(false, true, false);
+        ThisThread::sleep_for(3s);
+
+        // Stop motors
+        IN1 = 0; IN2 = 0;
+        IN3 = 0; IN4 = 0;
+        ENA = 0.0f;
+        ENB = 0.0f;
+        setLED(true, false , false);
+        ThisThread::sleep_for(1s);
+
+        // Move both motors backward
+        IN1 = 0; IN2 = 1;
+        IN3 = 0; IN4 = 1;
+        ENA = 0.8f;
+        ENB = 0.8f;
+        setLED(true, true, false); 
+        ThisThread::sleep_for(3s);
+
+        // Stop
+        IN1 = 0; IN2 = 0;
+        IN3 = 0; IN4 = 0;
+        ENA = 0.0f;
+        ENB = 0.0f;
+        setLED(true, false , false);
+        ThisThread::sleep_for(1s);
+
+    }
+}
+

@@ -1,0 +1,76 @@
+#include "mbed.h"
+#include <cctype>
+
+// --- Motor A ---
+PwmOut ENA(PTA1);      // PWM for Motor A (ENA)
+DigitalOut IN1(PTA2);  // Motor A direction pin 1
+DigitalOut IN2(PTA4);  // Motor A direction pin 2
+
+// --- Motor B ---
+PwmOut ENB(PTD3);      // PWM for Motor B (ENB) <-- different from ENA
+DigitalOut IN3(PTD2);  // Motor B direction pin 1
+DigitalOut IN4(PTD0);  // Motor B direction pin 2 (changed from PTD3)
+
+// --- Onboard RGB LED (active low) ---
+DigitalOut ledR(PTB18);
+DigitalOut ledG(PTB19);
+DigitalOut ledB(PTD1); // keep this - do NOT use PTD1 for motor PWM
+
+// --- Serial communication ---
+BufferedSerial pc(USBTX, USBRX, 9600);
+
+// --- Helper function for LED color ---
+void setLED(bool R, bool G, bool B) {
+    ledR = !R;  // active-low
+    ledG = !G;
+    ledB = !B;
+}
+
+void forward() {
+    IN1 = 1; IN2 = 0;   // Motor A forward
+    IN3 = 1; IN4 = 0;   // Motor B forward (swapped logic)
+    ENA = ENB = 0.8f;
+    setLED(false, true, false); // Green
+    pc.write("Moving forward\r\n", 17);
+}
+
+void backward() {
+    IN1 = 1; IN2 = 0;   // Motor A backward
+    IN3 = 0; IN4 = 1;   // Motor B backward (swapped logic)
+    ENA = ENB = 0.8f;
+    setLED(true, true, false); // Yellow
+    pc.write("Moving backward\r\n", 18);
+}
+
+void stopMotors() {
+    IN1 = 0; IN2 = 1;
+    IN3 = 1; IN4 = 0;
+    ENA = 0.0f;
+    ENB = 0.0f;
+    setLED(true, false, false); // Red
+    pc.write("Motors stopped\r\n", 16);
+}
+
+int main() {
+    // PWM frequency
+    ENA.period(0.001f);
+    ENB.period(0.001f);
+
+    pc.write("=== KL25Z Motor Control Ready ===\r\n", 36);
+    pc.write("Commands: F=Forward, B=Backward, S=Stop\r\n", 65);
+
+    while (true) {
+        char c = 0;
+        ssize_t n = pc.read(&c, 1);  // read returns number of bytes read
+        if (n == 1) {                // ONLY act if 1 byte was actually read
+            switch (toupper((unsigned char)c)) {
+                case 'F': forward(); break;
+                case 'B': backward(); break;
+                case 'S': stopMotors(); break;
+                default: pc.write("Invalid command\r\n", 18);
+            }
+        }
+        // small sleep to avoid tight loop (optional)
+        ThisThread::sleep_for(10ms);
+    }
+}
